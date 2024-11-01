@@ -1,6 +1,7 @@
 {{ Form::model($bookingorders, ['route' => ['bookingorder.update', $bookingorders->id], 'method' => 'PUT', 'enctype' => 'multipart/form-data','class'=>'needs-validation','novalidate']) }}
 <div class="modal-body">
     <div class="row">
+        
         <div class="form-group col-md-12">
             {!! Form::label('apartment_type_id', 'Apartment Type:', ['class' => 'form-label']) !!}
             {!! Form::select('apartment_type_id', $apartmentTypes->pluck('name', 'id'), old('apartment_type_id', $bookingorders->apartment_type_id), [
@@ -103,8 +104,8 @@
         <div class="form-group col-md-6">
             {!! Form::label('', __('Total Rent'), ['class' => 'form-label']) !!}
             {!! Form::number('amount_to_pay', $bookingorders->amount_to_pay, ['class' => 'form-control amount-to-pay', 'required' => true, 'readonly' => true]) !!}
-            <small id="discountMessage" class="text-success" style="display:none;"></small>
         </div>
+        
 
         <div class="modal-footer pb-0">
             <input type="button" value="Cancel" class="btn btn-light" data-bs-dismiss="modal">
@@ -443,7 +444,7 @@
     });
 </script> --}}
 
-<script>
+{{-- <script>
     $(document).ready(function() {
         $('#apartment_type_id').change(function() {
             const selectedApartmentTypeId = $(this).val();
@@ -544,6 +545,118 @@
                     success: function (data) {
                         $('.sub_total').val(data.total_price);  // Change from .total to .sub_total
                         updateAmountToPay(data.total_price);  // Update amount to pay based on fetched total price
+                    },
+                    complete: function () {
+                        $('.booking-btn').removeAttr('disabled');
+                    },
+                });
+            }
+        });
+
+        select2();
+
+        function select2() {
+            if ($(".select2").length > 0) {
+                $($(".select2")).each(function (index, element) {
+                    var id = $(element).attr('id');
+                    new Choices('#' + id, {
+                        removeItemButton: true,
+                    });
+                });
+            }
+        }
+    });
+</script> --}}
+
+
+<script>
+    document.getElementById('apartment_type_id').addEventListener('change', function () {
+        const selectedApartmentTypeId = this.value;
+        const roomSelect = document.getElementById('room_id');
+        
+        // Show only rooms that match the selected apartment type
+        Array.from(roomSelect.options).forEach(option => {
+            if (option.value === "") {
+                option.hidden = false; // Keep the placeholder option visible
+                option.selected = true; // Select the placeholder option by default
+            } else {
+                const roomApartmentTypeId = option.getAttribute('data-apartment-type-id');
+                option.hidden = roomApartmentTypeId !== selectedApartmentTypeId;
+            }
+        });
+    });
+    $(document).ready(function() {
+
+        $('#room_id').change(function () {
+            const selectedOption = this.options[this.selectedIndex];
+            const totalRent = parseFloat(selectedOption.getAttribute('data-rent-value'));
+
+            $('.sub_total').val(totalRent.toFixed(2));
+            updateAmountToPay(totalRent);  
+        });
+
+        $('#applyDiscountButton').click(function () {
+            const totalRent = parseFloat($('.total').val()) || 0;
+            const discountAmount = parseFloat($('#discount_amount').val()) || 0;
+            const errorMessage = $('#discountErrorMessage');
+
+            errorMessage.hide();
+
+            if (discountAmount < 0) {
+                errorMessage.text('Discount cannot be less than 0').show();
+                $('#discount_amount').val(0);
+            } else if (discountAmount > totalRent) {
+                errorMessage.text('Discount cannot be greater than Total Rent').show();
+                $('#discount_amount').val(totalRent.toFixed(2));
+            } else {
+                updateAmountToPay(totalRent);
+            }
+
+            updateAmountToPay(totalRent);  
+        });
+
+        function updateAmountToPay(totalRent) {
+            let discountAmount = parseFloat($('#discount_amount').val()) || 0;
+            let amountToPay = totalRent - discountAmount;
+
+            if (amountToPay < 0) {
+                amountToPay = 0;
+            }
+
+            $('.amount-to-pay').val(amountToPay.toFixed(2)); 
+        }
+
+        $('.check_date, .room').change(function() {
+            const date1 = $('.check_in').val();
+            const date2 = $('.check_out').val();
+            const totalRooms = $('.room').val();
+            const roomId = $('#room_id').val();
+
+            if (date1 && date2 && totalRooms && roomId) {
+                const data = {
+                    room: roomId,
+                    total_room: totalRooms,
+                    date1: date1,
+                    date2: date2
+                };
+
+                $.ajaxSetup({
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    }
+                });
+
+                $.ajax({
+                    type: "get",
+                    url: $('.check_date').attr('data-url'),
+                    data: data,
+                    cache: false,
+                    beforeSend: function () {
+                        $('.booking-btn').attr('disabled', 'disabled');
+                    },
+                    success: function (data) {
+                        $('.total').val(data.total_price);  
+                        updateAmountToPay(data.total_price);  
                     },
                     complete: function () {
                         $('.booking-btn').removeAttr('disabled');

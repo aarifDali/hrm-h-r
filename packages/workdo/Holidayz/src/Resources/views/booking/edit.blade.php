@@ -51,14 +51,16 @@
                                         @permission('rooms booking edit')
                                             <div class="action-btn bg-info ms-2">
                                                 <a href="#"
-                                                            class="mx-3 btn btn-sm d-inline-flex align-items-center"
-                                                            data-url="{{ route('bookingorder.edit', $booking->id) }}"
-                                                            class="dropdown-item" data-ajax-popup="true"
-                                                            data-bs-toggle="tooltip" data-size="lg"
-                                                            data-bs-original-title="{{ __('Edit Booking Order') }}"
-                                                            data-title="{{ __('Edit Booking Order') }}">
-                                                            <span class="text-white">
-                                                                <i class="ti ti-pencil"></i></span></a>
+                                                    class="mx-3 btn btn-sm d-inline-flex align-items-center"
+                                                    data-url="{{ route('bookingorder.edit', $booking->id) }}"
+                                                    class="dropdown-item" data-ajax-popup="true"
+                                                    data-bs-toggle="tooltip" data-size="lg"
+                                                    data-bs-original-title="{{ __('Edit Booking Order') }}"
+                                                    data-title="{{ __('Edit Booking Order') }}">
+                                                    <span class="text-white">
+                                                        <i class="ti ti-pencil"></i>
+                                                    </span>
+                                                </a>
                                             </div>
                                         @endpermission
                                         @permission('rooms booking delete')

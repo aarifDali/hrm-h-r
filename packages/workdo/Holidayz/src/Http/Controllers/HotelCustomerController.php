@@ -76,14 +76,10 @@ class HotelCustomerController extends Controller
                 return redirect()->back()->with('error', $messages->first());
             }
 
-            // Handle file upload for ID proof using your custom logic
-            if ($request->has('id_proof')) {
-                $Name = $request->id_proof->getClientOriginalName();
-            
-                // Use Laravel's storeAs method to save the file to 'storage/app/public/id_proofs'
+            if ($request->hasFile('id_proof')) {
+                $Name = time() . '_' . $request->id_proof->getClientOriginalName();
                 $path = $request->file('id_proof')->storeAs('public/id_proofs', $Name);
-            
-                // Check if the file was stored correctly
+    
                 if (!$path) {
                     return response()->json([
                         'flag' => 'error',
@@ -91,7 +87,8 @@ class HotelCustomerController extends Controller
                         'msg' => 'File upload failed'
                     ]);
                 }
-            
+    
+                // Set the id_proof attribute to the filename
                 $request['id_proof'] = $Name;
             }
 
@@ -211,7 +208,7 @@ class HotelCustomerController extends Controller
                     Storage::delete('public/id_proofs/' . $user->id_proof); 
                 }
 
-                $Name = $request->id_proof->getClientOriginalName(); 
+                $Name = time() . '_' . $request->id_proof->getClientOriginalName();
                 $path = $request->file('id_proof')->storeAs('public/id_proofs', $Name); 
                 
                 if (!$path) {

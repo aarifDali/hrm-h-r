@@ -6,6 +6,7 @@ use App\Models\EmailTemplate;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Log;
 use Workdo\Holidayz\DataTables\RoomsBookingDataTable;
 use Workdo\Holidayz\Entities\ApartmentType;
 use Workdo\Holidayz\Entities\BookingCoupons;
@@ -40,8 +41,12 @@ class RoomsBookingController extends Controller
     public function create()
     {
         if (\Auth::user()->isAbleTo('rooms booking create')) {
+
             $apartmentTypes = ApartmentType::all();
-            $rooms = Rooms::where(['created_by' => creatorId(), 'workspace' => getActiveWorkSpace()])->get();
+            $rooms = Rooms::where([
+                'created_by' => creatorId(), 
+                'workspace' => getActiveWorkSpace()
+            ])->get();
             $customers = HotelCustomer::where(['workspace' => getActiveWorkSpace(), 'type' => 'customer'])->get();
             return view('holidayz::booking.create', ['rooms' => $rooms, 'customers' => $customers, 'apartmentTypes' => $apartmentTypes]);
         } else {
@@ -366,7 +371,6 @@ class RoomsBookingController extends Controller
 
     public function BookingOrderUpdate(Request $request,$id)
     {
-        // dd($request->all());
         if (\Auth::user()->isAbleTo('rooms booking edit')) {
             $validator = \Validator::make(
                 $request->all(),
@@ -536,17 +540,5 @@ class RoomsBookingController extends Controller
             }
         }
     }
-
-
-    public function fetchRooms(Request $request)
-    {
-        $apartmentTypeId = $request->input('apartment_type_id');
-        
-        // Fetch rooms that belong to the selected apartment type
-        $rooms = Rooms::where('apartment_type_id', $apartmentTypeId)->get();
-
-        return response()->json(['rooms' => $rooms]);
-    }
-
 
 }

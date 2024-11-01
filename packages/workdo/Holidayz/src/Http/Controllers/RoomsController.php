@@ -7,7 +7,6 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Workdo\Holidayz\Entities\Rooms;
 use Illuminate\Support\Facades\File;
-use Modules\Holidayz\Entities\ApartmentType as EntitiesApartmentType;
 use Workdo\Holidayz\DataTables\RoomsDataTable;
 use Workdo\Holidayz\Entities\Hotels;
 use Workdo\Holidayz\Entities\HotelServices;
@@ -189,6 +188,7 @@ class RoomsController extends Controller
             $validator = \Validator::make(
                 $request->all(),
                 [
+                    'apartment_type_id' => 'required|exists:apartment_types,id',
                     'room_type' => 'required|max:120',
                     'adults' => 'required|numeric',
                     'children' => 'required|numeric',
